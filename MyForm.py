@@ -4,7 +4,7 @@ from flask import url_for, render_template, request, redirect
 app = Flask(__name__)
 
 
-@app.route('/myform')
+@app.route('/')
 def form():
     if request.args:
         name = request.args['name']
