@@ -17,7 +17,8 @@ def form():
         sex = request.args['Sex']
         food = request.args['food']
         comment = request.args["comment"]
-        print(name, birth, phone, country, city, sex, food, comment)
+        num = request.args["num"]
+        print(name, birth, phone, country, city, sex, food, num, comment)
         return render_template('aform.html', name=name, birth=birth)
     return render_template('qform.html')
 
