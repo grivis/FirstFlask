@@ -1,10 +1,10 @@
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 
 @app.route('/<thing>')
 def home(thing):
-    return app.send_static_file('templates/flask2.html')
+    return render_template('flask2.html', thing=thing)
 
 @app.route('/echo/<thing>')
 def echo(thing):
