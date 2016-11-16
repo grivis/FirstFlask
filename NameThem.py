@@ -16,6 +16,8 @@ def form():
     yyyyNow = str(lt.tm_year)
     hourNow = str(lt.tm_hour)
     minNow = str(lt.tm_min)
+    months = ['января', 'февраля', 'марта','апреля','мая',
+              'июня','июля','августа','сентября','октября','ноября','декабря']
 
     if request.args:
         # Анкета
@@ -36,12 +38,16 @@ def form():
                     'Television':television, 'Kettle':kettle}
         pickle.dump(questdic, f)
         f.close()
-        return render_template('Thanks.html', name=name, birth=age, day=ddNow, month=mmNow)
+        return render_template('Thanks.html', name=name, birth=age, day=ddNow, month=months[mmNow-1])
     return render_template('NameThings.html')
 
 @app.route('/stats')
 def stats():
     import glob, os
+    ticks = time()
+    lt = localtime(ticks)
+    hourNow = str(lt.tm_hour)
+    minNow = str(lt.tm_min)
     os.chdir("./")
     count = 0
     cmales = 0
@@ -60,8 +66,10 @@ def stats():
             ccity += 1
         else:
             cvillage += 1
+        f.close()
 
-    return render_template('Stats.html', count=count, cmales=cmales, cfemales=cfemales, ccity=ccity, cvillage=cvillage)
+    return render_template('Stats.html', count=count, cmales=cmales, cfemales=cfemales, ccity=ccity,
+                           cvillage=cvillage, hour=hourNow, minute=minNow)
 
 
 
