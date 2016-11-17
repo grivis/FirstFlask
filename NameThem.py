@@ -31,11 +31,13 @@ def form():
         coffeemach = request.args['coffeemach']
         television = request.args["television"]
         kettle = request.args["kettle"]
+        iron = request.args["iron"]
+        smartphone = request.args["smartphone"]
         #print(name, lastname, age, sex, residence, language)
         f = open('form' + mmNow + ddNow + hourNow + minNow, 'wb')
         questdic = {'Name': name, 'Lastname': lastname, 'Age': age, 'Sex': sex,
                     'Residence':residence, 'Language':language, 'Coffee':coffeemach,
-                    'Television':television, 'Kettle':kettle}
+                    'Television':television, 'Kettle':kettle, 'Iron':iron, 'Smartphone':smartphone}
         pickle.dump(questdic, f)
         f.close()
         return render_template('Thanks.html', name=name, birth=age, day=ddNow, month=months[mmNow-1])
