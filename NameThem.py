@@ -2,6 +2,7 @@ from flask import Flask
 from flask import url_for, render_template, request, redirect
 from time import *
 import pickle
+import glob, os
 
 app = Flask(__name__)
 
@@ -45,7 +46,6 @@ def form():
 
 @app.route('/stats')
 def stats():
-    import glob, os
     ticks = time()
     lt = localtime(ticks)
     hourNow = str(lt.tm_hour)
@@ -72,6 +72,65 @@ def stats():
 
     return render_template('Stats.html', count=count, cmales=cmales, cfemales=cfemales, ccity=ccity,
                            cvillage=cvillage, hour=hourNow, minute=minNow)
+
+@app.route('/search')
+def searchform():
+    # HTML текст, который надо выводить в браузер
+    ResultText =   '''
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Результаты поиска</title>
+    <style>
+    table, th, td {
+    border: 2px solid darkgreen;
+    border-collapse: collapse;}
+    th, td {
+    padding: 15px;}
+</style>
+</head>
+<body style="font-family:Arial;">
+<h1 style="color:darkgreen">Названия предмета, который Вы выбрали:</h1>
+
+<p></p>
+<table style="width:80%">
+  <tr>
+    <th>Респондент</th>
+    <th>Возраст</th>
+    <th>Язык</th>
+    <th>Название предмета</th>
+  </tr>
+'''
+    # Окончание HTML текста
+    ResultTextEnd = '''
+</table>
+<p>Благодарим за использование нашего сервиса!</p>
+</body>
+</html>
+    '''
+
+
+    if request.args:
+        # Выбор пользователя
+
+        searchword = request.args['SearchWord']
+        os.chdir("./")
+        resultstring = ''
+        for file in glob.glob("form*"):
+            f = open(file, 'rb')
+            dic = pickle.load(f)
+            word = dic.get(searchword, '---')
+            language = dic.get('Language', '---')
+            responder = dic.get('Name', '---')
+            age = dic.get('Age', '---')
+            resultstring += '<tr>'+'<td>'+responder+'</td>'+'<td>'+age+'</td>' \
+                             +'<td>'+language+'<td>'+word+'</td>'+'</tr>'+'\n '
+            f.close()
+
+
+        return ResultText + resultstring + ResultTextEnd
+    return render_template('Search.html')
 
 
 
