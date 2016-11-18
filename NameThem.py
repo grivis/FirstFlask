@@ -3,6 +3,7 @@ from flask import url_for, render_template, request, redirect
 from time import *
 import pickle
 import glob, os
+import json
 
 app = Flask(__name__)
 
@@ -76,45 +77,45 @@ def stats():
 @app.route('/search')
 def searchform():
     # HTML текст, который надо выводить в браузер
-    ResultText =   '''
-    <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Результаты поиска</title>
-    <style>
-    table, th, td {
-    border: 2px solid darkgreen;
-    border-collapse: collapse;}
-    th, td {
-    padding: 15px;}
-</style>
-</head>
-<body style="font-family:Arial;">
-<h1 style="color:darkgreen">Названия предмета, который Вы выбрали:</h1>
+    ResultHTML =   '''
+        <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Результаты поиска</title>
+        <style>
+        table, th, td {
+        border: 2px solid darkgreen;
+        border-collapse: collapse;}
+        th, td {
+        padding: 15px;}
+    </style>
+    </head>
+    <body style="font-family:Arial;">
+    <h1 style="color:darkgreen">Названия предмета, который Вы выбрали:</h1>
 
-<p></p>
-<table style="width:80%">
-  <tr>
-    <th>Респондент</th>
-    <th>Возраст</th>
-    <th>Язык</th>
-    <th>Название предмета</th>
-  </tr>
-'''
-    # Окончание HTML текста
-    ResultTextEnd = '''
-</table>
-<p>Благодарим за использование нашего сервиса!</p>
-</body>
-</html>
+    <p></p>
+    <table style="width:80%">
+      <tr>
+        <th>Респондент</th>
+        <th>Возраст</th>
+        <th>Язык</th>
+        <th>Название предмета</th>
+      </tr>
     '''
+    # Окончание HTML текста
+    ResultHTMLEnd = '''
+    </table>
+    <p>Благодарим за использование нашего сервиса!</p>
+    </body>
+    </html>
+        '''
 
 
     if request.args:
         # Выбор пользователя
-
         searchword = request.args['SearchWord']
+        # Обход имеющихся анкет
         os.chdir("./")
         resultstring = ''
         for file in glob.glob("form*"):
@@ -128,9 +129,22 @@ def searchform():
                              +'<td>'+language+'<td>'+word+'</td>'+'</tr>'+'\n '
             f.close()
 
-
-        return ResultText + resultstring + ResultTextEnd
+        # Выдаем результат в виде HTML документа, в который вставлена таблица результатов поиска
+        return ResultHTML + resultstring + ResultHTMLEnd
+    # вновь возвращаем исходную форму, если не выбран предмет поиска
     return render_template('Search.html')
+
+@app.route('/json')
+def jsonout():
+    os.chdir("./")
+    alldicts = {}
+    for file in glob.glob("form*"):
+        f = open(file, 'rb')
+        dic = pickle.load(f)
+        alldicts[file] = dic
+        f.close()
+    json_string = json.dumps(alldicts)
+    return json_string
 
 
 
