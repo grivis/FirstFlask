@@ -143,7 +143,7 @@ def jsonout():
         dic = pickle.load(f)
         alldicts[file] = dic
         f.close()
-    json_string = json.dumps(alldicts)
+    json_string = json.dumps()
     return json_string
 
 
