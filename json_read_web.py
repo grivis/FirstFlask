@@ -12,7 +12,8 @@ responce = urlopen('http://flask.grivis.ru/json').read().decode('utf-8')
 
 alldict = json.loads(responce)
 
-for onedict in alldict.values():
+for onekey, onedict in alldict.items():
+    print('---', onekey, '---')
     for key, value in onedict.items():
         print(key, value)
-    print('-------')
+    print('--------------------')
