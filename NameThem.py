@@ -1,5 +1,22 @@
+'''
+Программа реализует лексико-типологическую анкету. Пользователю
+демонстрируются изображения предметов, он вводит названия на своем языке
+Дополнительно к программе необходимы HTML файлы в папке templates
+NameThings.html Thanks.html Search.html Stats.html
+a также изображения из папки static
+static/coffee.png static/Colorful-Welcome-Text-Header-Image.png
+static/iron.png static/kettle.png static/smartphone.png
+static/television.png static/thankyou-final-VCH-650x280-600x280.png
+Реализованы страницы:
+<hostname:port>/ - сама анкета
+<hostname:port>/stats - статистика по анкетам
+<hostname:port>/search - поиск по анкетам и результаты поиска
+<hostname:port>/json - вывод данных всех анкет в формате JSON
+'''
+
+# Импортируем нужные модули
 from flask import Flask
-from flask import url_for, render_template, request, redirect
+from flask import render_template, request
 from time import *
 import pickle
 import glob, os
@@ -15,7 +32,6 @@ def form():
     lt = localtime(ticks)
     ddNow = str(lt.tm_mday)
     mmNow = str(lt.tm_mon)
-    yyyyNow = str(lt.tm_year)
     hourNow = str(lt.tm_hour)
     minNow = str(lt.tm_min)
     months = ['января', 'февраля', 'марта','апреля','мая',
@@ -35,30 +51,26 @@ def form():
         kettle = request.args["kettle"]
         iron = request.args["iron"]
         smartphone = request.args["smartphone"]
-        #print(name, lastname, age, sex, residence, language)
         f = open('form' + mmNow + ddNow + hourNow + minNow, 'wb')
         questdic = {'Name': name, 'Lastname': lastname, 'Age': age, 'Sex': sex,
                     'Residence':residence, 'Language':language, 'Coffee':coffeemach,
                     'Television':television, 'Kettle':kettle, 'Iron':iron, 'Smartphone':smartphone}
         pickle.dump(questdic, f)
         f.close()
-        return render_template('Thanks.html', name=name, birth=age, day=ddNow, month=months[mmNow-1])
+        return render_template('Thanks.html', name=name, birth=age, day=ddNow, month=months[int(mmNow)-1])
     return render_template('NameThings.html')
 
 @app.route('/stats')
 def stats():
+    # Выводится статистика по заполненным анкетам
     ticks = time()
     lt = localtime(ticks)
     hourNow = str(lt.tm_hour)
     minNow = str(lt.tm_min)
     os.chdir("./")
-    count = 0
-    cmales = 0
-    cfemales = 0
-    ccity = 0
-    cvillage = 0
+    count, cmales, cfemales, ccity, cvillage = 0, 0, 0, 0, 0
     for file in glob.glob("form*"):
-        count = count + 1
+        count += 1
         f = open(file, 'rb')
         dic = pickle.load(f)
         if dic['Sex'] == 'male':
@@ -76,6 +88,8 @@ def stats():
 
 @app.route('/search')
 def searchform():
+    # Пользователь выбирает картинку с предметом и
+    #  получает его названия на разных языках
     # HTML текст, который надо выводить в браузер
     ResultHTML =   '''
         <!DOCTYPE html>
@@ -130,22 +144,22 @@ def searchform():
             f.close()
 
         # Выдаем результат в виде HTML документа, в который вставлена таблица результатов поиска
+        # Шаблон HTML не сохраняем заранее в виде файла, формируем страницу на лету
         return ResultHTML + resultstring + ResultHTMLEnd
     # вновь возвращаем исходную форму, если не выбран предмет поиска
     return render_template('Search.html')
 
 @app.route('/json')
 def jsonout():
+    # Вывод всех заполненных анкет в формате HTML
     os.chdir("./")
     alldicts = {}
     for file in glob.glob("form*"):
         f = open(file, 'rb')
-        dic = pickle.load(f)
-        alldicts[file] = dic
+        alldicts[file] = pickle.load(f)
         f.close()
     json_string = json.dumps(alldicts)
     return json_string
-
 
 
 if __name__ == '__main__':
